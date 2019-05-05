@@ -5,6 +5,9 @@ import PropTypes from 'prop-types';
 class BouncingBalls extends PureComponent {
   static propTypes = {
     amount: PropTypes.number.isRequired,
+    x: PropTypes.number,
+    y: PropTypes.number,
+    random: PropTypes.bool,
     animationDuration: PropTypes.number.isRequired,
     animationType: PropTypes.func,
     minSpeed: PropTypes.number.isRequired,
@@ -16,6 +19,9 @@ class BouncingBalls extends PureComponent {
 
   static defaultProps = {
     amount: 1,
+    x: 100,
+    y: 100,
+    random: true,
     animationDuration: 5000,
     minSpeed: 30,
     maxSpeed: 200,
@@ -32,7 +38,7 @@ class BouncingBalls extends PureComponent {
     this.circles = this.generateCircles();
 
     this.state = {
-      position: new Animated.ValueXY({x: 0, y: 0}),
+      position: new Animated.ValueXY({x: this.props.x, y: this.props.y}),
     };
   }
 
@@ -79,27 +85,52 @@ class BouncingBalls extends PureComponent {
   updateCirclePosition(circle) {
     const _circle = Object.assign({}, circle);
     const height = width = circle.style[1].width;
-    const maxWidth = this.screenWidth - width;
-    const maxHeight = this.screenHeight - height;
+    const maxWidth = this.screenWidth - width + 300;
+    const maxHeight = this.screenHeight - height + 300;
+
 
     _circle.x = _circle.x + _circle.speedX;
     _circle.y = _circle.y + _circle.speedY;
 
-    if (_circle.x <= 0) {
-      _circle.x = 0;
-      _circle.speedX *= (-1);
-    } else if (_circle.x >= maxWidth) {
-      _circle.x = maxWidth;
-      _circle.speedX *= (-1);
+    if (this.props.random) {
+
+      if (_circle.x <= -300) {
+        _circle.x = -300;
+        _circle.speedX *= (-1);
+      } else if (_circle.x >= maxWidth) {
+        _circle.x = maxWidth;
+        _circle.speedX *= (-1);
+      }
+
+      if (_circle.y <= -300) {
+        _circle.y = -300;
+        _circle.speedY *= (-1);
+      } else if (_circle.y >= maxHeight) {
+        _circle.y = maxHeight;
+        _circle.speedY *= (-1);
+      }
+
+    } else {
+
+      if (_circle.x <= this.props.x -20) {
+        _circle.x = this.props.x - 20;
+        _circle.speedX *= (-1);
+      } else if (_circle.x >= this.props.x + 20) {
+        _circle.x = this.props.x + 20;
+        _circle.speedX *= (-1);
+      }
+
+      if (_circle.y <= this.props.y -20) {
+        _circle.y = this.props.y -20;
+        _circle.speedY *= (-1);
+      } else if (_circle.y >= this.props.y +20) {
+        _circle.y = this.props.y +20;
+        _circle.speedY *= (-1);
+      }
+
     }
 
-    if (_circle.y <= 0) {
-      _circle.y = 0;
-      _circle.speedY *= (-1);
-    } else if (_circle.y >= maxHeight) {
-      _circle.y = maxHeight;
-      _circle.speedY *= (-1);
-    }
+
 
     return _circle;
   }
@@ -126,12 +157,22 @@ class BouncingBalls extends PureComponent {
         borderRadius,
       };
 
-      restStyles = {
-        x: this.getRangeFromMinToMax(0, this.screenWidth - width),
-        y: this.getRangeFromMinToMax(0, this.screenHeight - height),
-        speedX: direction * this.getRangeFromMinToMax(minSpeed, maxSpeed),
-        speedY: direction * this.getRangeFromMinToMax(minSpeed, maxSpeed),
-      };
+      if (this.props.random) {
+        restStyles = {
+          x: this.getRangeFromMinToMax(0, this.screenWidth - width + 300),
+          y: this.getRangeFromMinToMax(0, this.screenHeight - height + 300),
+          speedX: direction * this.getRangeFromMinToMax(minSpeed, maxSpeed),
+          speedY: direction * this.getRangeFromMinToMax(minSpeed, maxSpeed),
+        };
+      } else {
+        restStyles = {
+          x: this.props.x,
+          y: this.props.y,
+          speedX: direction * this.getRangeFromMinToMax(minSpeed, maxSpeed),
+          speedY: direction * this.getRangeFromMinToMax(minSpeed, maxSpeed),
+        };
+
+      }
 
       item = imageBall ?
         <Image
